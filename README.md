@@ -7,7 +7,7 @@ ARDA Suite brings the local-first Jarvis assistant, the experimental ARDA Core/H
 | Component | Path | Purpose | Maturity |
 |---|---|---|---|
 | Jarvis + ARDA Core | [`apps/jarvis`](apps/jarvis/) | Desktop voice assistant, Linux/Raspberry Pi daemon, bounded agent runtime | Desktop app is the historical base; ARDA Core/Hermes features are experimental unless a specific acceptance record says otherwise |
-| Shared Memory | [`services/memory`](services/memory/) | Optional local memory service, MCP endpoint, dashboard and maintenance jobs | Separate service; install only when needed |
+| Shared Memory | [`services/memory`](services/memory/) | Optional local memory service, MCP endpoint, dashboard and maintenance jobs | Separate service; install only when needed; see its [component guide](services/memory/README.md) |
 
 The memory service owns Qdrant/Ollama integration behind its API. Jarvis can also use the same store through its optional memory adapter. The service does not share a Python environment with Jarvis.
 

@@ -82,7 +82,7 @@ else
   echo -e "${GREEN}✓ Qdrant container running on port 6333.${NC}"
 fi
 
-echo -e "\n${BOLD}[3/7] Setting up Ollama for Local Embeddings (nomic-embed-text)...${NC}"
+echo -e "\n${BOLD}[3/7] Setting up local Ollama models...${NC}"
 if ! command -v ollama >/dev/null 2>&1; then
   echo -e "${BLUE}Installing Ollama...${NC}"
   curl -fsSL https://ollama.com/install.sh | sh
@@ -91,12 +91,49 @@ fi
 
 # Ensure Ollama service is active
 if command -v systemctl >/dev/null 2>&1; then
-  sudo systemctl enable --now ollama >/dev/null 2>&1 || true
+  if ! sudo systemctl enable --now ollama >/dev/null 2>&1; then
+    echo "Could not enable/start Ollama; inspect the Ollama service before retrying." >&2
+    exit 1
+  fi
 fi
 
 echo -e "${BLUE}Pulling nomic-embed-text embedding model...${NC}"
-ollama pull nomic-embed-text || true
+if ! ollama pull nomic-embed-text; then
+  echo "Could not download Ollama embedding model nomic-embed-text." >&2
+  exit 1
+fi
 echo -e "${GREEN}✓ Embedding model ready.${NC}"
+echo -e "${BLUE}Pulling qwen2.5:7b-instruct local LLM...${NC}"
+if ! ollama pull qwen2.5:7b-instruct; then
+  echo "Could not download Ollama LLM qwen2.5:7b-instruct." >&2
+  exit 1
+fi
+echo -e "${GREEN}✓ Local LLM ready.${NC}"
+
+QDRANT_READY=false
+for attempt in {1..10}; do
+  if curl --fail --silent http://127.0.0.1:6333/healthz >/dev/null 2>&1; then
+    QDRANT_READY=true
+    break
+  fi
+  sleep 1
+done
+if [ "$QDRANT_READY" != true ]; then
+  echo "Qdrant did not pass its local health check at 127.0.0.1:6333." >&2
+  exit 1
+fi
+OLLAMA_READY=false
+for attempt in {1..10}; do
+  if curl --fail --silent http://127.0.0.1:11434/api/tags >/dev/null 2>&1; then
+    OLLAMA_READY=true
+    break
+  fi
+  sleep 1
+done
+if [ "$OLLAMA_READY" != true ]; then
+  echo "Ollama did not pass its local API health check at 127.0.0.1:11434." >&2
+  exit 1
+fi
 
 echo -e "\n${BOLD}[4/7] Preparing Python Virtual Environment...${NC}"
 cd "$MEM0_DIR"
@@ -123,9 +160,10 @@ if [ ! -f "$CONFIG_ENV" ]; then
   ( umask 077; cat << EOF > "$CONFIG_ENV"
 # mem0-local Raspberry Pi Configuration
 MEM0_OWNER=$CURRENT_USER
-MEM0_LLM_PROVIDER=nvidia
-# NVIDIA_API_KEY=nvapi-YOUR_KEY_HERE
-MEM0_LLM_MODEL=meta/llama-3.1-70b-instruct
+# Local by default. Remote providers require explicit configuration and send
+# memory extraction content to that provider; keep provider keys out of Git.
+MEM0_LLM_PROVIDER=ollama
+MEM0_LLM_MODEL=qwen2.5:7b-instruct
 
 # Network bindings
 MEM0_MCP_TRANSPORT=streamable-http
@@ -162,7 +200,10 @@ else
 fi
 
 echo -e "\n${BOLD}[7/7] Running Initial Brain Health Audit...${NC}"
-./.venv/bin/python mem.py health --scope personal || true
+if ! ./.venv/bin/python mem.py health --scope personal; then
+  echo "Initial memory health check failed; inspect service dependencies and logs." >&2
+  exit 1
+fi
 
 # Determine Local IP
 PI_IP=127.0.0.1
