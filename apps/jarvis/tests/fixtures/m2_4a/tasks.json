@@ -1,0 +1,34 @@
+[
+  {
+    "task_id": "queue-claim",
+    "objective": "claim job lease",
+    "relevant_files": ["arda/queue.py"],
+    "relevant_regions": [
+      {"path": "arda/queue.py", "start_line": 1, "end_line": 3}
+    ]
+  },
+  {
+    "task_id": "worker-heartbeat",
+    "objective": "worker heartbeat",
+    "relevant_files": ["arda/worker.py"],
+    "relevant_regions": [
+      {"path": "arda/worker.py", "start_line": 1, "end_line": 3}
+    ]
+  },
+  {
+    "task_id": "artifact-upload",
+    "objective": "upload artifact",
+    "relevant_files": ["arda/worker.py"],
+    "relevant_regions": [
+      {"path": "arda/worker.py", "start_line": 4, "end_line": 5}
+    ]
+  },
+  {
+    "task_id": "complete-job",
+    "objective": "complete job",
+    "relevant_files": ["arda/queue.py"],
+    "relevant_regions": [
+      {"path": "arda/queue.py", "start_line": 4, "end_line": 5}
+    ]
+  }
+]

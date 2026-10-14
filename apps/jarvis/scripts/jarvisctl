@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -eu
+
+if [ "$(uname -s)" != "Linux" ]; then
+  echo "jarvisctl yalnızca Linux/Raspberry Pi üzerinde kullanılabilir." >&2
+  exit 1
+fi
+if ! command -v systemctl >/dev/null 2>&1; then
+  echo "systemctl bulunamadı." >&2
+  exit 1
+fi
+
+action=${1:-status}
+case "$action" in
+  status)
+    systemctl --user --no-pager --full status jarvis.service
+    ;;
+  logs)
+    journalctl --user -u jarvis.service -f
+    ;;
+  start|stop|restart)
+    systemctl --user "$action" jarvis.service
+    ;;
+  listen)
+    systemctl --user kill --signal=SIGUSR1 jarvis.service
+    ;;
+  *)
+    echo "Kullanım: $0 {status|logs|start|stop|restart|listen}" >&2
+    exit 2
+    ;;
+esac

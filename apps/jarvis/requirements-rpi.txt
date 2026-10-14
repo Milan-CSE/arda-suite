@@ -1,0 +1,13 @@
+# Raspberry Pi/Linux headless daemon bağımlılıkları.
+# macOS'a özel mlx/parakeet/menubar paketleri özellikle dahil edilmez.
+sounddevice
+soundfile
+numpy
+pyyaml
+ollama
+vosk
+ddgs
+pytest
+
+# Hafıza/Qdrant entegrasyonu kullanılacaksa ayrıca kurulabilir:
+# mem0ai

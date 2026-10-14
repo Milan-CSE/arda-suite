@@ -1,0 +1,18 @@
+[Unit]
+Description=mem0-local MCP Server (Shared Brain)
+After=network.target docker.service
+
+[Service]
+Type=simple
+User=@MEM0_USER@
+WorkingDirectory=@MEM0_DIR@
+EnvironmentFile=-%h/.mem0/config.env
+Environment=MEM0_MCP_TRANSPORT=streamable-http
+Environment=MEM0_MCP_HOST=127.0.0.1
+Environment=MEM0_MCP_PORT=8812
+ExecStart=@MEM0_DIR@/.venv/bin/python mcp_server.py --transport streamable-http
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

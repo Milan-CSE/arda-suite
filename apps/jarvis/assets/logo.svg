@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 44" fill="none">
+  <!-- Şimşek sembolü — 36x44 canvas, geometrik, bold -->
+  <path
+    d="M22 2 L8 24 L17 24 L14 42 L32 18 L22 18 Z"
+    fill="#0F0F0F"
+  />
+  <!-- Wordmark -->
+  <text
+    x="44"
+    y="31"
+    font-family="'SF Pro Display', 'Inter', 'Helvetica Neue', sans-serif"
+    font-size="22"
+    font-weight="700"
+    letter-spacing="-0.8"
+    fill="#0F0F0F"
+  >arda</text>
+</svg>

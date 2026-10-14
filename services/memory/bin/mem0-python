@@ -1,0 +1,42 @@
+#!/bin/sh
+# The one place that answers "which Python runs mem0-local code?".
+#
+# Every entry point (Claude Code hooks, the dashboard, ad-hoc scripts) goes
+# through here instead of naming an interpreter path of its own, so moving the
+# repo, rebuilding the venv, or vendoring this tree into a Claude Code plugin
+# is a change in exactly one file.
+#
+# Resolution order, first hit wins:
+#   1. $MEM0_PYTHON      explicit override (CI, a system python, a second venv)
+#   2. <root>/.venv/bin/python   the repo venv — the normal case, has mem0 installed
+#   3. python3 on PATH   last resort; enough for the stdlib-only hooks, NOT
+#                        enough for anything importing mem0
+#
+# The root is derived from this script's own location rather than hardcoded, so
+# $CLAUDE_PLUGIN_ROOT-style relocation needs no edit here — set MEM0_ROOT to
+# override. It is exported so the Python side (mem0_common.MEM0_ROOT) agrees
+# with whatever was resolved here.
+#
+# Usage: bin/mem0-python path/to/script.py [args...]
+set -eu
+
+SELF_DIR=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
+MEM0_ROOT=${MEM0_ROOT:-$(dirname -- "$SELF_DIR")}
+export MEM0_ROOT
+
+if [ -n "${MEM0_PYTHON:-}" ]; then
+    PY=$MEM0_PYTHON
+elif [ -x "$MEM0_ROOT/.venv/bin/python" ]; then
+    PY=$MEM0_ROOT/.venv/bin/python
+else
+    PY=$(command -v python3 2>/dev/null || true)
+fi
+
+if [ -z "${PY:-}" ] || [ ! -x "$PY" ]; then
+    # Loud on stderr, non-zero exit: a hook that silently runs nothing is worse
+    # than one that says why. Hook callers keep their own fail-open behaviour.
+    echo "mem0-python: no usable interpreter (tried \$MEM0_PYTHON, $MEM0_ROOT/.venv/bin/python, python3)" >&2
+    exit 127
+fi
+
+exec "$PY" "$@"

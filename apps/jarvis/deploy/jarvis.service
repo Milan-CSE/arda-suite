@@ -1,0 +1,20 @@
+[Unit]
+Description=Jarvis desktop agent (headless daemon)
+After=network-online.target sound.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/arda-suite/apps/jarvis
+ExecStart=%h/arda-suite/apps/jarvis/.venv/bin/python -m arda
+Environment=PYTHONUTF8=1
+Environment=LANG=C.UTF-8
+Environment=LC_ALL=C.UTF-8
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=15
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=default.target

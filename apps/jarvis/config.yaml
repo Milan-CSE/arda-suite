@@ -1,0 +1,152 @@
+# Jarvis — varsayılan ayarlar (COMMIT edilir, sır içermez)
+brain:
+  model: "qwen3:8b"
+  host: "http://localhost:11434"
+  autostart: true        # Ollama kapalıysa açılışta otomatik başlat (Ollama.app). false → elle aç.
+  think: false           # qwen3 düşünme modu kapalı — hızlı yapılandırılmış çıktı
+  keep_alive: "10m"      # modeli sıcak tut, ilk istek yavaş olmasın
+  answer_temperature: 0.7  # serbest sohbet cevabı (answered) için sıcaklık — router 0.1'de kalır
+  router_model: "qwen3:8b"  # classify (router) için 8b: 1.7b parametre formatını ve eylemleri bozuyor.
+                            # answer ile aynı model paylaşıldığından tek yükleme yapılır ve RAM'de model-swap olmaz.
+
+profile:                 # "Beni daha iyi anla" — tek statik çekirdek: STT + router + beyin'e beslenir
+  # vocabulary → whisper'a isim/terim önyüklemesi (initial_prompt): özel isimler doğru yazılır.
+  # Kendi isimlerini/proje adlarını/sık geçen terimleri virgülle ekle.
+  vocabulary: "Jarvis, mem0, Qdrant, Ollama, Claude, parakeet, whisper"
+  # about → her cevapta beyne "kullanıcı hakkında" bağlamı (seni tanır + niyeti daha iyi çözer).
+  about: |
+    Kullanıcı Türkçe konuşur, teknik terimleri İngilizce kullanır ve kısa,
+    net cevapları tercih eder. Bu örnek profili kişiselleştirin.
+  # commands → router'a few-shot niyet ipucu. Kendi gerçek komut kalıplarını "say"/"intent" ile ekle.
+  # geçerli intent'ler: answered | action | note | task | research | agent
+  commands:
+    - say: "şunu projeye not düş"
+      intent: note
+    - say: "testleri çalıştır ve özetle"
+      intent: agent
+
+stt:
+  backend: "parakeet"    # "parakeet"/"whisper" → MLX | "vosk" → offline RPi/Linux STT
+  timeout_sec: 30        # komut STT'si bu süre içinde dönmezse hata (UI 'Yazıya çeviriyor'da donmaz)
+  parakeet_model: "mlx-community/parakeet-tdt-0.6b-v3"  # Parakeet modeli (Apache 2.0, çok dilli; Türkçe YOK)
+  model: "mlx-community/whisper-large-v3-turbo"          # whisper backend modeli (backend: whisper iken kullanılır)
+  vosk_model: "models/vosk-en"                           # backend: vosk modeli; Türkçe Vosk modeliyle değiştirilebilir
+  language: "tr"                                          # whisper backend dili (parakeet'i etkilemez)
+  silence_rms: 0.006     # sessizlik geçidi: kayıt RMS'i bunun altındaysa STT'ye HİÇ gitme (whisper
+                         # uydurmasın). Ölçülen konuşma ~0.018-0.023 (bu mikrofon) → 0.02 fazla
+                         # agresifti, konuşmayı 'sessizlik' sanıp eliyordu. Loglanan gerçek
+                         # kayıtlar: konuşma 0.0096-0.018, sessizlik 0.0015-0.005 → 0.008
+                         # en alçak sesli konuşmanın %20 altında kalıyordu (kırılgan).
+                         # 0.006 ikisinin ortası. halüsinasyon filtresi 2. savunma.
+
+dictation:               # Wispr Flow-benzeri yüzen amblem: bas → konuş → metin imlece yapışır
+  enabled: true          # ekranda yüzen amblem gösterilsin mi (yalnız menubar modunda)
+  hotkey: "cmd+shift+d"  # global aç-kapa kısayolu (ajan cmd+shift+a'dan AYRI)
+  language: "auto"       # otomatik dil algılama (İngilizce konuş → İngilizce, Türkçe → Türkçe)
+  cleanup: "light"       # "light" (kural-tabanlı temizlik) | "none" (ham STT çıktısı)
+  transcribe_timeout_sec: 90  # STT takılırsa amblem sonsuza dek "yazıyor"da kalmasın
+  # NOT: dikte her zaman çok-dilli mlx-whisper kullanır (parakeet İngilizce-odaklı). Ajan
+  # parakeet kullanıyorsa dikte whisper modelini AYRICA yükler (~+1.5 GB RAM).
+
+tts:
+  voice: "Yelda"         # macOS Türkçe sesi (say -v Yelda)
+
+vad:
+  silence_sec: 1.2       # bu kadar sessizlikten sonra kaydı durdur
+  energy_threshold: null # null → gürültü tabanı SÜREÇ BAŞINA BİR KEZ kalibre edilir (1sn
+                         # mikrofon ölçümü, sonra önbellek). Her kayıtta tekrarlansaydı
+                         # tetik ile kayıt arasına 1sn ölü zaman girip ilk hece kaybolurdu.
+                         # TTS konuşurken ölçüm yapılmaz (hoparlör sesi eşiği şişirip
+                         # barge-in'i öldürür). Sabit değer yazarsan kalibrasyon atlanır.
+  max_sec: 60.0          # güvenlik: bu süreden sonra kayıt kesin durur (sonsuz döngü koruması)
+
+app:
+  mode: "menubar"        # "menubar" → menü çubuğu app | "daemon" → görünmez arka plan
+  wake_ack: "Efendim?"   # tetik (⌘⇧A) sonrası verilen sesli yanıt
+  log_dir: null          # null → ~/Library/Logs/Jarvis. Her koşu jarvis.log'a yazar (rotating).
+  log_level: "INFO"      # DEBUG → daha ayrıntılı; hata ayıklarken "DEBUG" yap
+  warm_on_start: true    # açılışta Whisper modelini ısıt (ilk kayıt yavaş olmasın)
+  listen_on_start: true  # açılır açılmaz ⌘⇧A beklemeden ilk dinleme turunu başlat (wake_ack sesli sinyal verir)
+  stream_tts: true       # answered cevabı CÜMLE CÜMLE seslendir (ilk-sese-kadar gecikme düşer); false → tam-cevap bekle
+  wake_enabled: false    # VARSAYILAN: push-to-talk (⌘⇧A). true → her-zaman-dinle:
+                         # mic sürekli açık + wake kelimesi için kendi .onnx modelin gerekir
+  conversation_max_turns: 8    # kısa süreli sohbet belleği: kaç tur tutulsun
+  conversation_idle_sec: 300   # bu kadar sessizlikten (idle) sonra bağlam temizlenir (5 dk)
+  # Sürekli sohbet: cevaptan sonra mic bu kadar saniye konuşma başlangıcı bekler ('hey jarvis'
+  # gerekmeden devam). Sessizse standby'a döner. 0 → kapalı (her tur yeniden tetik gerekir).
+  follow_up_window_sec: 8
+  confirm_low_confidence: true   # düşük-güvenli eylemi SESSİZCE yapma: "şunu mu demek istedin?"
+                                 # diye sor, açık "evet" ile çalıştır. false → eski davranış (inbox).
+                                 # cevap takip penceresinde gelir; sessizlikte eylem yapılmaz.
+  confirm_timeout_sec: 60        # bekleyen onay bu süre sonra DÜŞER (yanıt gelmezse eylem yapılmaz)
+  barge_in: true           # true → konuşurken araya girince TTS kesilir ve yeni ses kaydedilir
+  # Bu ifadelerden biri söylenince sohbet oturumu biter ('Görüşürüz.' + standby; app kapanmaz).
+  stop_phrases: ["kapat kendini", "kendini kapat", "konuşmayı bitir", "görüşürüz"]
+
+wake:
+  backend: "parakeet"    # "oww" → openWakeWord | "whisper" → Whisper STT | "parakeet" → NVIDIA Parakeet (İngilizce)
+  # --- OWW backend ayarları ---
+  model_path: null       # null → TÜM yerleşik kelimeler. Tek ad ("hey_jarvis") → sadece o.
+  threshold: 0.5         # 0–1; yükselt → daha az yanlış tetik, alçalt → daha hassas
+  framework: "onnx"      # openWakeWord çıkarım motoru: "onnx" | "tflite"
+  # --- Whisper / Parakeet (STT-tabanlı) backend ayarları ---
+  phrase: "hey jarvis"   # tanınması gereken wake phrase (parakeet İngilizce çalışır)
+  chunk_sec: 1.5         # Kaç saniyelik ses parçası STT'ye verilsin
+  whisper_model: "mlx-community/whisper-tiny-mlx"  # whisper backend için hafif wake modeli
+  parakeet_model: null   # null → stt.parakeet_model (ana STT'yle AYNI model paylaşılır → tek yükleme)
+  # NOT: parakeet wake SÜREKLİ dinlemede ağırdır (0.6B). wake_enabled: true ile pil/CPU yükü
+  # yüksekse whisper-tiny wake'e dön; Parakeet'i yalnızca ana STT'de tut.
+  speaker_verify: false  # true → yalnız whisper/parakeet'te kayıtlı ses tetikler; vosk/oww fail-safe olarak PTT'ye düşer
+  speaker_profile: "models/speaker_profile.npy"
+  speaker_threshold: 0.75  # 0–1; düşür → daha toleranslı, yükselt → daha katı
+
+research:                # Faz 4 — web araştırma ("şunu araştır / internetten bak")
+  provider: "auto"       # auto → Tavily (key varsa) yoksa DuckDuckGo | "tavily" | "duckduckgo"
+  max_results: 5         # kaç kaynak çekilsin (sentez + kaynaklı not)
+  # tavily_api_key config.local.yaml'da (sır). Boşsa otomatik DuckDuckGo'ya düşer (anahtarsız).
+
+agent:                   # Faz 5 — çok-adımlı desktop agent ("bu projeyi incele", "testleri çalıştır")
+  # GENİŞ ERİŞİM: "~" → tüm ev klasörü. Dosya araçları bu köke hapsedilir (sır/credential
+  # yolları — .ssh/.env/.aws/keychain — yine REDDEDİLİR). Riskli işlemler (yaz/sil/shell)
+  # native onay dialog'u ister + her koşu AgentRuns'a loglanır. Daraltmak için repo yolu yaz.
+  workspace: "."
+  max_steps: 12          # bir koşuda en fazla kaç adım çalıştırılsın (sonsuz plan koruması)
+  run_timeout_sec: 120   # toplam agent koşu deadline'ı; tool timeout'larından bağımsız
+  test_cmd: ["pytest", "-q"]   # run_tests aracının çalıştıracağı komut (workspace cwd)
+  screenshot_enabled: false    # true → screenshot aracı açık (ekran görüntüsü workspace'e)
+  ui_automation: true    # AppleScript/System Events: her uygulamayı yaz/tuş/menü ile kontrol et
+                         # (macOS Accessibility izni gerekir; tüm UI işlemleri ONAY ister)
+  log_dir: null          # null → vault/AgentRuns. Her koşunun denetim günlüğü (agent-YYYY-MM-DD.md)
+
+browser:                 # Camofox HTTP browser adapter (salt-okunur ilk slice)
+  base_url: http://localhost:9377
+  timeout_seconds: 15
+  user_id: jarvis
+  session_key: ""
+
+memory:                   # Ortak kalıcı hafıza (Claude Code ile aynı yerel mem0 deposu)
+  enabled: false
+  qdrant_host: localhost
+  qdrant_port: 6333
+  collection: mem0_local        # mem0-local ile AYNI olmalı (ortak depo)
+  owner: default
+  extract_model: qwen3:8b       # brain ile AYNI (zaten sıcak; model-swap yok). Referans mem0-local de bunu kullanıyor
+  ollama_base_url: http://localhost:11434
+  recall_scopes: [personal, jarvis]
+  recall_top_k: 4
+  recall_timeout_sec: 1.5
+  # Scope-aware recall: identities follow mem0-local/mem0_project.py; this list is
+  # JARVIS authorization, not a second project-name registry.
+  project_scopes: [example-project]
+  active_project: example-project
+  shared_scope: null
+  include_shared: false
+
+vault:
+  categories:
+    internship: "Internship"
+    research: "Research"
+    idea: "Ideas"
+    daily: "Daily"
+    task: "Tasks.md"
+    inbox: "Inbox"       # asla-veri-kaybetme fallback klasörü

@@ -1,0 +1,6 @@
+# Optional M2.3B/M2.3C research adapters.
+# SearXNG runs as a separate HTTP sidecar; it is not embedded in Arda Core.
+trafilatura
+# Optional tracing; Core remains functional when OTel is absent.
+opentelemetry-api
+opentelemetry-sdk

@@ -1,0 +1,15 @@
+[Unit]
+Description=mem0-local Telegram Assistant Bot (Shared Brain)
+After=network.target mem0-mcp.service
+
+[Service]
+Type=simple
+User=@MEM0_USER@
+WorkingDirectory=@MEM0_DIR@
+EnvironmentFile=-%h/.mem0/config.env
+ExecStart=@MEM0_DIR@/.venv/bin/python @MEM0_DIR@/telegram_bot.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

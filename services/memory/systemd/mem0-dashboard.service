@@ -1,0 +1,17 @@
+[Unit]
+Description=mem0-local Web Control Panel & Dashboard
+After=network.target mem0-mcp.service
+
+[Service]
+Type=simple
+User=@MEM0_USER@
+WorkingDirectory=@MEM0_DIR@
+EnvironmentFile=-%h/.mem0/config.env
+Environment=MEM0_DASHBOARD_HOST=127.0.0.1
+Environment=MEM0_DASHBOARD_PORT=8899
+ExecStart=@MEM0_DIR@/.venv/bin/python @MEM0_DIR@/dashboard/server.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

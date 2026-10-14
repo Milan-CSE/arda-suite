@@ -1,0 +1,63 @@
+# Python virtualenv (188M — recreate with the setup steps in README)
+.venv/
+
+# Qdrant vector-store DATA (the memories themselves — large, machine-local, not code)
+qdrant_storage/
+qdrant_data/
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Config backups written by the MCP-wiring step
+*.bak-*
+*.bak
+
+# The HTTP-mode bearer token lives in ~/.mem0/mcp-token, outside this tree.
+# This is a backstop in case MEM0_MCP_TOKEN_FILE is ever pointed in here.
+mcp-token
+*.token
+
+# graphify knowledge-graph output (regenerate with `graphify extract .`)
+graphify-out/
+
+# subagent-driven-development scratch (ledgers, briefs, review packages)
+.superpowers/
+
+# bin/ holds the vendored Qdrant binary (69M, darwin-arm64 — see README).
+# Ignore its contents but keep the tracked launcher scripts.
+bin/*
+!bin/mem0-python
+!bin/mcp-auth-header
+
+# Dashboard runtime state: one file per session and per recall, written while the
+# panel runs. Machine-local and unbounded — a few hundred already accumulate in a
+# normal week, and none of it means anything on another machine.
+state/
+
+# Store snapshots taken before a purge or a migration. Recovery material for this
+# machine, not something another checkout should carry.
+snapshots/
+
+# Append-only telemetry the hooks and the panel write as you work: what ran and
+# what it cost, which projects were touched, which commands failed and are worth
+# retrying. Same category as state/ — machine-local, unbounded, and a guaranteed
+# merge conflict on every pull, since two checkouts never append the same lines.
+usage.jsonl
+projects-activity.jsonl
+pending-failures.jsonl
+
+# OS / editor cruft
+.DS_Store
+*.log
+logs/
+qdrant_storage.backup/
+.qdrant-initialized
+.graph.db
+.trajectories/
+.agents/
+dist/
+
+

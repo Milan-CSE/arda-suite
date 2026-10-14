@@ -1,0 +1,24 @@
+[Unit]
+Description=Arda Hermes coordination runtime
+After=network.target
+
+[Service]
+Type=simple
+User=jarvis
+Group=jarvis
+WorkingDirectory=/opt/arda-suite/apps/jarvis
+Environment=PYTHONPATH=/opt/arda-suite/apps/jarvis
+StateDirectory=arda-suite
+ExecStart=/opt/arda-suite/apps/jarvis/.venv/bin/python -m arda.hermes_daemon --db /var/lib/arda-suite/hermes.sqlite3 --host 127.0.0.1 --port 18775
+Restart=on-failure
+RestartSec=3s
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/arda-suite
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

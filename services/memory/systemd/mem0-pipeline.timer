@@ -1,0 +1,11 @@
+[Unit]
+Description=Run mem0-local Maintenance & Consolidation Pipeline daily at 03:30 AM
+After=network.target
+
+[Timer]
+OnCalendar=*-*-* 03:30:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target

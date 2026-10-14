@@ -1,0 +1,27 @@
+# --- Faz 1 (V1 çekirdek) ---
+sounddevice        # mikrofon kaydı + TTS çıkış akışı
+soundfile          # TTS: `say` ile render edilen WAV'ı okuma (speak._render)
+numpy              # ses tamponu + enerji-tabanlı VAD
+pyyaml             # config yükleme
+ollama             # beyin: Ollama HTTP client
+mlx-whisper        # STT (Apple Silicon, in-process, sıcak model) — whisper backend
+parakeet-mlx       # STT/wake: NVIDIA Parakeet (Apache 2.0, Apple Silicon) — parakeet backend
+# Not: parakeet WAV transkripsiyonu için ffmpeg gerekmez; MP3/diğer için `brew install ffmpeg`.
+
+# --- Geliştirme ---
+pytest
+hf_xet             # HF model indirmelerini Xet ile hızlı çek (büyük model şart)
+mem0ai             # yerel ortak kalıcı hafıza (Qdrant + Ollama)
+py2app             # Arda.app paketleme (make app) — sadece build için
+
+# --- Faz 2/3: her zaman dinleyen wake-word + menü çubuğu app ---
+openwakeword       # wake backend "oww" — yerleşik kelimeler / kendi .onnx modelin (API key yok)
+vosk               # wake backend "vosk" — offline KaldiRecognizer (config.wake.backend: vosk)
+resemblyzer        # konuşmacı doğrulama (config.wake.speaker_verify: true) — sadece kayıtlı ses tetikler
+rumps              # Faz 3 — macOS menü çubuğu uygulaması
+pynput             # Global kısayol ⌘⇧A (opsiyonel; izin/eksikse menüye fallback)
+
+# --- Faz 4: web araştırma ---
+ddgs               # anahtarsız DuckDuckGo araması (fallback provider)
+# Tavily birincil provider olarak stdlib urllib ile çağrılır (ayrı paket gerekmez);
+# kullanmak için config.local.yaml → research.tavily_api_key doldur.

@@ -1,0 +1,84 @@
+{
+  "_comment": "Which agents, skills and rules to reach for in each phase of the 16-phase AI Development Protocol. Every name here was checked against what this machine actually has installed (the Agents, Skills and Rules panels read the same sources). Empty lists are deliberate: nothing real covers that phase yet, and inventing a name would send the chip to a panel entry that does not exist.",
+  "discover": {
+    "agents": ["Explore", "feature-dev:code-explorer"],
+    "skills": ["brainstorming", "iterative-retrieval"],
+    "rules": ["development-workflow.md"]
+  },
+  "spec": {
+    "agents": ["planner"],
+    "skills": ["brainstorming", "writing-plans"],
+    "rules": ["development-workflow.md"]
+  },
+  "context": {
+    "agents": ["Explore", "docs-lookup"],
+    "skills": ["graphify", "iterative-retrieval"],
+    "rules": ["performance.md"]
+  },
+  "design": {
+    "agents": ["architect", "feature-dev:code-architect"],
+    "skills": ["council", "writing-plans"],
+    "rules": ["patterns.md"]
+  },
+  "contracts": {
+    "agents": ["architect"],
+    "skills": ["api-design"],
+    "rules": ["patterns.md"]
+  },
+  "decompose": {
+    "agents": ["planner"],
+    "skills": ["writing-plans"],
+    "rules": ["development-workflow.md"]
+  },
+  "prioritize": {
+    "agents": ["planner"],
+    "skills": ["writing-plans"],
+    "rules": ["development-workflow.md"]
+  },
+  "build": {
+    "agents": ["general-purpose", "tdd-guide"],
+    "skills": ["test-driven-development", "executing-plans", "coding-standards"],
+    "rules": ["coding-style.md", "patterns.md"]
+  },
+  "verify": {
+    "agents": ["tdd-guide", "e2e-runner"],
+    "skills": ["verification-before-completion", "verification-loop", "e2e-testing"],
+    "rules": ["testing.md"]
+  },
+  "review": {
+    "agents": ["code-reviewer", "security-reviewer", "silent-failure-hunter"],
+    "skills": ["requesting-code-review", "receiving-code-review"],
+    "rules": ["code-review.md", "security.md"]
+  },
+  "approve": {
+    "agents": [],
+    "skills": [],
+    "rules": ["code-review.md"],
+    "note": "Human gate — no agent approves its own work."
+  },
+  "commit": {
+    "agents": ["github-dev:commit-creator"],
+    "skills": ["using-git-worktrees"],
+    "rules": ["git-workflow.md"]
+  },
+  "ci": {
+    "agents": ["build-error-resolver"],
+    "skills": ["systematic-debugging"],
+    "rules": ["development-workflow.md"]
+  },
+  "release": {
+    "agents": ["github-dev:pr-creator"],
+    "skills": [],
+    "rules": ["git-workflow.md"]
+  },
+  "observe": {
+    "agents": ["performance-optimizer"],
+    "skills": ["agent-introspection-debugging"],
+    "rules": ["performance.md"]
+  },
+  "learn": {
+    "agents": ["doc-updater"],
+    "skills": [],
+    "rules": ["agents.md"]
+  }
+}

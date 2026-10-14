@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Jarvis — launchd LaunchAgent şablonu (daemon modu).
+
+  Kurulum:
+    1) config.local.yaml içinde:  app: { mode: "daemon" }
+    2) Aşağıdaki YOL'ları kendi repo yolunla değiştir.
+    3) cp deploy/com.example.jarvis.plist ~/Library/LaunchAgents/
+    4) launchctl load ~/Library/LaunchAgents/com.example.jarvis.plist
+    5) Durdur:  launchctl unload ~/Library/LaunchAgents/com.example.jarvis.plist
+
+  NOT: Arka plan (launchd) süreçlerine mikrofon izni vermek macOS'ta zordur
+  (TCC). Mikrofon izni sorun olursa "menubar" modunu kullan — menü çubuğu
+  app'i izin penceresini düzgün tetikler.
+  (İç paket adı `arda` kalır; bu yüzden ProgramArguments hâlâ `-m arda`.)
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.example.jarvis</string>
+
+  <key>ProgramArguments</key>
+  <array>
+  <string>/path/to/arda-suite/apps/jarvis/.venv/bin/python</string>
+    <string>-m</string>
+    <string>arda</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/path/to/arda-suite/apps/jarvis</string>
+
+  <!-- launchd ortamında LANG yok → open() ascii olur ve parakeet config.json
+       UTF-8 baytında çöker. UTF-8'i garanti et (kod tarafındaki ensure_utf8 ile birlikte). -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PYTHONUTF8</key>
+    <string>1</string>
+    <key>LANG</key>
+    <string>en_US.UTF-8</string>
+    <key>LC_ALL</key>
+    <string>en_US.UTF-8</string>
+    <!-- Homebrew PATH: yoksa ffmpeg bulunamaz → transkripsiyon boş döner ("cevap yok"). -->
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <key>KeepAlive</key>
+  <true/>
+
+  <key>StandardOutPath</key>
+  <string>/tmp/jarvis.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/tmp/jarvis.err.log</string>
+</dict>
+</plist>

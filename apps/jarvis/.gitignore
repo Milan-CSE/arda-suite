@@ -1,0 +1,26 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+config.local.yaml
+.env
+.env.*
+!.env.example
+.claude/
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Local run output, raw evaluation traces, and project snapshots are not source.
+/artifacts/
+/experiments/
+
+# Kişisel asistan verisi — koda ait değil (notlar, araştırma, inbox).
+vault/
+
+# Model binary'leri (büyük, makineye/sürüme özel). README izlenir, ağırlıklar izlenmez.
+models/*.npy
+models/vosk-en/
+models/*.onnx
+models/*.tflite

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Template, not the installed file. launchd cannot expand $HOME or any variable
+  in these fields, so __MEM0_ROOT__ is substituted at install time by
+  `mem0ctl.sh http-install`, which writes the result to
+  ~/Library/LaunchAgents/com.mem0.mcp-http.plist.
+
+  Deliberately absent: the bearer token. The server reads it from
+  ~/.mem0/mcp-token (0600) itself, so the secret never lands in a plist that
+  Spotlight indexes and any process can read.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.mem0.mcp-http</string>
+
+    <!-- bin/mem0-python resolves the interpreter and exports MEM0_ROOT. -->
+    <key>ProgramArguments</key>
+    <array>
+        <string>__MEM0_ROOT__/bin/mem0-python</string>
+        <string>__MEM0_ROOT__/mcp_server.py</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>__MEM0_ROOT__</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <!-- The only thing that makes this the HTTP instance. Host/port are left
+             at their defaults (127.0.0.1:8812); MEM0_MCP_ALLOW_NONLOCAL is not
+             set, so a non-loopback bind stays impossible from here. -->
+        <key>MEM0_MCP_TRANSPORT</key>
+        <string>streamable-http</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <!-- Restart on crash. A misconfiguration (missing/short token) also exits
+         non-zero, so ThrottleInterval keeps that a slow retry rather than a hot
+         loop filling the log. -->
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+
+    <key>StandardOutPath</key>
+    <string>__MEM0_ROOT__/logs/mcp-http.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>__MEM0_ROOT__/logs/mcp-http.err.log</string>
+</dict>
+</plist>

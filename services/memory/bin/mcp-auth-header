@@ -1,0 +1,59 @@
+#!/bin/sh
+# Emit the Authorization header for the mem0 Central Brain as JSON, for use as a
+# Claude Code MCP `headersHelper`.
+#
+# Why a helper rather than the token in the config: MCP config files are read by
+# editors, synced, screenshotted and pasted into bug reports. Here the only thing
+# stored is the path to this script; the secret stays in one 0600 file that never
+# appears in any config, log, or shell history.
+#
+#   stdout : {"Authorization":"Bearer <token>"} and nothing else, ever
+#   stderr : the reason it failed — never the token or any part of it
+#   exit   : 0 on success, non-zero if there is no usable token
+#
+# Token source, same precedence the server uses:
+#   $MEM0_MCP_TOKEN, else $MEM0_MCP_TOKEN_FILE, else ~/.mem0/mcp-token
+#
+# Windows note: this is a POSIX script. A Windows worker needs the native
+# equivalent (a .ps1 reading a file under %USERPROFILE% with an ACL limited to
+# the current user); do not assume this path exists there.
+set -eu
+
+MIN_LEN=32      # matches mcp_transport.MIN_TOKEN_LEN
+fail() { echo "mcp-auth-header: $1" >&2; exit 1; }
+
+token=${MEM0_MCP_TOKEN:-}
+
+if [ -z "$token" ]; then
+    file=${MEM0_MCP_TOKEN_FILE:-$HOME/.mem0/mcp-token}
+    [ -f "$file" ] || fail "no token: $file not found"
+    [ -r "$file" ] || fail "no token: $file not readable"
+
+    # A secret any other account can read is already leaked; refuse rather than
+    # quietly hand it over. Same rule the server applies to itself.
+    # BSD stat first (macOS), then GNU (Linux); an unrecognised stat means the
+    # check is skipped rather than failing every call on an unknown platform.
+    mode=$(stat -f '%Lp' "$file" 2>/dev/null || stat -c '%a' "$file" 2>/dev/null || true)
+    case "$mode" in
+        ''|*[!0-7]*) : ;;                         # no usable stat — skip
+        *)
+            group_other=$(printf '%s' "$mode" | tail -c 2)
+            [ "$group_other" = "00" ] || \
+                fail "$file is group/world accessible; run: chmod 600 $file"
+            ;;
+    esac
+
+    token=$(tr -d '\r\n' < "$file")
+fi
+
+[ -n "$token" ] || fail "token is empty"
+[ "${#token}" -ge "$MIN_LEN" ] || fail "token is too short (need >= $MIN_LEN chars)"
+
+# Only opaque token characters. This is both a sanity check on the file and the
+# reason no JSON escaping is needed below — anything that could break out of the
+# string is rejected instead of quoted.
+case "$token" in
+    *[!A-Za-z0-9._~+/=-]*) fail "token contains unexpected characters" ;;
+esac
+
+printf '{"Authorization":"Bearer %s"}\n' "$token"

@@ -1,0 +1,27 @@
+# Arda — yerel/gizli ayarlar ŞABLONU
+# Kullanım:  cp config.local.example.yaml config.local.yaml  (config.local.yaml git'e girmez)
+vault:
+  path: "~/Vault"   # Replace with your local Obsidian vault path.
+
+# "Arda" wake word için özel openWakeWord modeli (opsiyonel).
+# Boş/eksikse openWakeWord yerleşik kelimeleriyle test edilir (bkz. README).
+# wake:
+#   model_path: "~/models/hey_arda.onnx"
+
+# Görünmez arka plan (launchd daemon) istiyorsan:
+# app:
+#   mode: "daemon"
+
+# Raspberry Pi/Linux headless daemon için:
+# app:
+#   mode: "daemon"
+#   wake_enabled: true
+# stt:
+#   backend: "vosk"
+#   vosk_model: "models/vosk-en"
+# wake:
+#   backend: "vosk"
+#   vosk_model: "models/vosk-en"
+
+research:
+  tavily_api_key: ""     # Faz 4 — https://tavily.com

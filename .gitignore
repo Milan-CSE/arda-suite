@@ -1,0 +1,37 @@
+# Python and build outputs
+**/.venv/
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/*.egg-info/
+**/build/
+**/dist/
+
+# Local configuration, credentials, and assistant data
+.env
+.env.*
+!.env.example
+**/config.local.yaml
+**/*.token
+**/mcp-token
+**/vault/
+**/state/
+**/logs/
+**/*.log
+**/*.db
+**/*.sqlite*
+
+# Models and generated/runtime data
+apps/jarvis/models/*.npy
+apps/jarvis/models/vosk-en/
+services/memory/qdrant_storage/
+services/memory/qdrant_data/
+services/memory/snapshots/
+services/memory/graphify-out/
+services/memory/usage.jsonl
+services/memory/projects-activity.jsonl
+services/memory/pending-failures.jsonl
+services/memory/.trajectories/
+artifacts/
+experiments/
+.DS_Store

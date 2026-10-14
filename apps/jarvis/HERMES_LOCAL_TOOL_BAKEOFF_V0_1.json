@@ -1,0 +1,33 @@
+{
+  "experiment": "Hermes Local Tool Compatibility Bake-off v0.1",
+  "date": "2026-10-07",
+  "pi": {
+    "model": "Raspberry Pi 5 Model B Rev 1.1",
+    "architecture": "aarch64",
+    "ram_bytes": 8453963776,
+    "swap_bytes": 2147467264,
+    "free_disk_bytes_at_discovery": 91111735296,
+    "ollama_version": "0.35.0",
+    "hermes_commit": "0a374d167424cdc730ce9761368b62255b551e58"
+  },
+  "configuration": {
+    "provider": "custom:local-ollama",
+    "endpoint": "http://127.0.0.1:11434/v1",
+    "streaming": false,
+    "context_length": 16384,
+    "raw_num_ctx": 8192,
+    "cloud": false,
+    "arda_core": false
+  },
+  "candidates": [
+    {"model":"qwen3.5:4b","raw_api_chat":"PASS_previous_verified","raw_openai":"PASS_previous_verified","hermes_terminal":"RESOURCE_ABORT","hermes_file":"NOT_RUN","classification":"RESOURCE_UNSUITABLE"},
+    {"model":"phi4-mini:3.8b-q4_K_M","raw_api_chat":"FAIL_structured_call_absent","raw_openai":"FAIL_structured_call_absent","hermes_terminal":"NOT_RUN","hermes_file":"NOT_RUN","classification":"MODEL_TOOL_CALL_INCOMPATIBILITY"},
+    {"model":"granite3.3:2b","raw_api_chat":"PASS","raw_openai":"PASS","hermes_terminal":"FAIL_0_tool_use_0_tool_result","hermes_file":"NOT_RUN","classification":"HERMES_TRANSPORT_OR_NORMALIZATION"},
+    {"model":"qwen3:4b-thinking-2507-q4_K_M","raw_api_chat":"FAIL_HTTP_500","raw_openai":"PASS","hermes_terminal":"FAIL_0_tool_use_0_tool_result","hermes_file":"NOT_RUN","classification":"MODEL_TOOL_CALL_INCOMPATIBILITY"}
+  ],
+  "local_hermes_candidate": null,
+  "goal_judge": "NOT_RUN",
+  "taskforge": "BLOCKED",
+  "thermal_abort_count": 0,
+  "optional_lfm2_5": "SKIPPED_RESOURCE_HEADROOM"
+}
