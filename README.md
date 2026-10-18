@@ -108,6 +108,7 @@ make test-memory
 
 For in-depth architectural specifications, ADRs, and verification records:
 
+- 📚 **Documentation Index:** [Guides by component and task](docs/README.md)
 - 📐 **Architecture Deep Dive:** [Jarvis Architecture](apps/jarvis/docs/ARCHITECTURE.md)
 - 📋 **Engineering Evidence & Design Matrix:** [Engineering Notes](docs/ENGINEERING_NOTES.md)
 - 📑 **Specifications & Contracts Archive:** [ARDA Core & Hermes Specs](apps/jarvis/docs/specs/README.md)
